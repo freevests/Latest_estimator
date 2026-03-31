@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  files       File[]
+}
+
+model File {
+  id           String   @id @default(cuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  filename     String
+  originalName String
+  mimeType     String
+  size         BigInt
+  source       String   // "upload" | "dropbox" | "onedrive"
+  storageType  String   // "local" | "linked"
+  storagePath  String?
+  cloudPath    String?
+  cloudUrl     String?
+  status       String   @default("uploaded") // uploaded | linked | parsing | parsed | error
+  parsedData   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CloudToken {
+  id           String    @id @default(cuid())
+  provider     String    @unique // "dropbox" | "onedrive"
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
