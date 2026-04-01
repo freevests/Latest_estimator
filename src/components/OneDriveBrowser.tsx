@@ -94,16 +94,27 @@ export function OneDriveBrowser({ projectId, connected, onImport }: OneDriveBrow
         </p>
         <button
           onClick={async () => {
-            const res = await fetch("/api/onedrive/auth");
-            if (res.ok) {
-              const { url } = await res.json();
-              window.location.href = url;
+            try {
+              const res = await fetch("/api/onedrive/auth");
+              const data = await res.json();
+              if (res.ok && data.url) {
+                window.location.href = data.url;
+              } else {
+                alert(data.error || "Failed to connect OneDrive. Check your .env credentials.");
+              }
+            } catch {
+              alert("Failed to connect to OneDrive. Make sure the server is running.");
             }
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
         >
           Connect OneDrive
         </button>
+        <p className="text-xs text-gray-400 mt-3 max-w-md mx-auto">
+          Requires ONEDRIVE_CLIENT_ID and ONEDRIVE_CLIENT_SECRET in .env.
+          Register an app at{" "}
+          <span className="font-mono">portal.azure.com</span> &gt; App Registrations
+        </p>
       </div>
     );
   }

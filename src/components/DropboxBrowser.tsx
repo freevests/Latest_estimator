@@ -89,16 +89,27 @@ export function DropboxBrowser({ projectId, connected, onImport }: DropboxBrowse
         <p className="text-gray-500 mb-4">Connect your Dropbox account to browse files</p>
         <button
           onClick={async () => {
-            const res = await fetch("/api/dropbox/auth");
-            if (res.ok) {
-              const { url } = await res.json();
-              window.location.href = url;
+            try {
+              const res = await fetch("/api/dropbox/auth");
+              const data = await res.json();
+              if (res.ok && data.url) {
+                window.location.href = data.url;
+              } else {
+                alert(data.error || "Failed to connect Dropbox. Check your .env credentials.");
+              }
+            } catch {
+              alert("Failed to connect to Dropbox. Make sure the server is running.");
             }
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
         >
           Connect Dropbox
         </button>
+        <p className="text-xs text-gray-400 mt-3 max-w-md mx-auto">
+          Requires DROPBOX_APP_KEY and DROPBOX_APP_SECRET in .env.
+          Create an app at{" "}
+          <span className="font-mono">dropbox.com/developers/apps</span>
+        </p>
       </div>
     );
   }
